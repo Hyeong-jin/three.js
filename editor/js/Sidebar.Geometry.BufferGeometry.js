@@ -2,51 +2,51 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-Sidebar.Geometry.BufferGeometry = function ( signals ) {
+Sidebar.Geometry.BufferGeometry = function ( editor ) {
 
-	var container = new UI.Panel();
+	var strings = editor.strings;
 
-	// vertices
+	var signals = editor.signals;
 
-	var verticesRow = new UI.Panel();
-	var vertices = new UI.Text().setFontSize( '12px' );
+	var container = new UI.Row();
 
-	verticesRow.add( new UI.Text( 'Vertices' ).setWidth( '90px' ) );
-	verticesRow.add( vertices );
+	function update( object ) {
 
-	container.add( verticesRow );
-
-	// faces
-
-	var facesRow = new UI.Panel();
-	var faces = new UI.Text().setFontSize( '12px' );
-
-	facesRow.add( new UI.Text( 'Faces' ).setWidth( '90px' ) );
-	facesRow.add( faces );
-
-	container.add( facesRow );
-
-	//
-
-	var update = function ( object ) {
-
-		if ( object === null ) return;
+		if ( object === null ) return; // objectSelected.dispatch( null )
+		if ( object === undefined ) return;
 
 		var geometry = object.geometry;
 
-		if ( geometry instanceof THREE.BufferGeometry ) { 
+		if ( geometry instanceof THREE.BufferGeometry ) {
 
+			container.clear();
 			container.setDisplay( 'block' );
 
-			vertices.setValue( ( geometry.attributes.position.array.length / 3 ).format() );
+			var text = new UI.Text( strings.getKey( 'sidebar/geometry/buffer_geometry/attributes' ) ).setWidth( '90px' );
+			container.add( text );
 
-			if ( geometry.attributes.index !== undefined ) {
+			var container2 = new UI.Span().setDisplay( 'inline-block' ).setWidth( '160px' );
+			container.add( container2 );
 
-				faces.setValue( ( geometry.attributes.index.array.length / 3 ).format() );
+			var index = geometry.index;
 
-			} else {
+			if ( index !== null ) {
 
-				faces.setValue( ( geometry.attributes.position.array.length / 9 ).format() );
+				container2.add( new UI.Text( strings.getKey( 'sidebar/geometry/buffer_geometry/index' ) ).setWidth( '80px' ) );
+				container2.add( new UI.Text( ( index.count ).format() ).setFontSize( '12px' ) );
+				container2.add( new UI.Break() );
+
+			}
+
+			var attributes = geometry.attributes;
+
+			for ( var name in attributes ) {
+
+				var attribute = attributes[ name ];
+
+				container2.add( new UI.Text( name ).setWidth( '80px' ) );
+				container2.add( new UI.Text( ( attribute.count ).format() + ' (' + attribute.itemSize + ')' ).setFontSize( '12px' ) );
+				container2.add( new UI.Break() );
 
 			}
 
@@ -56,11 +56,11 @@ Sidebar.Geometry.BufferGeometry = function ( signals ) {
 
 		}
 
-	};
+	}
 
 	signals.objectSelected.add( update );
 	signals.geometryChanged.add( update );
 
 	return container;
 
-}
+};
